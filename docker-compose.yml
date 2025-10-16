@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  api-monitoring:
+    # Construye desde tu repositorio local (fork)
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: uptime-kuma
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "${UPTIME_PORT:-3001}:3001"
+    environment:
+      # Variables de conexión a la base de datos
+      - UPTIME_KUMA_DB_TYPE=mariadb
+      - UPTIME_KUMA_DB_HOST=mariadb
+      - UPTIME_KUMA_DB_PORT=3306
+      - UPTIME_KUMA_DB_NAME=${DB_NAME}
+      - UPTIME_KUMA_DB_USERNAME=${DB_USER}
+      - UPTIME_KUMA_DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - uptime-network
+    restart: unless-stopped
+
+  mariadb:
+    image: mariadb:11.2
+    container_name: uptime-mariadb
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - TZ=${TIMEZONE:-America/Mexico_City}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    networks:
+      - uptime-network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+networks:
+  uptime-network:
+    driver: bridge
+
+volumes:
+  mariadb-data:
+    driver: local
