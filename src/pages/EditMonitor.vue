@@ -998,6 +998,13 @@
                                         <option value="oauth2-cc">
                                             {{ $t("OAuth2: Client Credentials") }}
                                         </option>
+                                        <option value="oauth2-ropc">
+                                            {{
+                                                $t(
+                                                    "OAuth2: Resource Owner Password Credentials"
+                                                )
+                                            }}
+                                        </option>
                                         <option value="ntlm">
                                             NTLM
                                         </option>
@@ -1021,7 +1028,7 @@
                                             <textarea id="tls-ca" v-model="monitor.tlsCa" class="form-control" :placeholder="$t('Server CA')"></textarea>
                                         </div>
                                     </template>
-                                    <template v-else-if="monitor.authMethod === 'oauth2-cc' ">
+                                    <template v-else-if="monitor.authMethod === 'oauth2-cc' || monitor.authMethod === 'oauth2-ropc'">
                                         <div class="my-3">
                                             <label for="oauth_auth_method" class="form-label">{{ $t("Authentication Method") }}</label>
                                             <select id="oauth_auth_method" v-model="monitor.oauth_auth_method" class="form-select">
@@ -1049,6 +1056,20 @@
                                             <div class="my-3">
                                                 <label for="oauth_scopes" class="form-label">{{ $t("OAuth Scope") }}</label>
                                                 <input id="oauth_scopes" v-model="monitor.oauth_scopes" type="text" class="form-control" :placeholder="$t('Optional: Space separated list of scopes')">
+                                            </div>
+                                            <div class="my-3">
+                                                <label for="oauth_audience" class="form-label">{{ $t("OAuth Audience") }}</label>
+                                                <input id="oauth_audience" v-model="monitor.oauth_audience" type="text" class="form-control" :placeholder="$t('Optional: The audience to request the JWT for')">
+                                            </div>
+                                        </template>
+                                        <template v-if="monitor.authMethod === 'oauth2-ropc'">
+                                            <div class="my-3">
+                                                <label for="oauth_username" class="form-label">{{ $t("Resource Owner Username") }}</label>
+                                                <input id="oauth_username" v-model="monitor.oauth_username" type="text" class="form-control" :placeholder="$t('Username')" required>
+                                            </div>
+                                            <div class="my-3">
+                                                <label for="oauth_password" class="form-label">{{ $t("Resource Owner Password") }}</label>
+                                                <input id="oauth_password" v-model="monitor.oauth_password" type="password" class="form-control" :placeholder="$t('Password')" required>
                                             </div>
                                             <div class="my-3">
                                                 <label for="oauth_audience" class="form-label">{{ $t("OAuth Audience") }}</label>
